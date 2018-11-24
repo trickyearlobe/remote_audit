@@ -34,6 +34,7 @@ action :run do
     results[:profiles].select! { |p| p } # Remove nil profiles
     results[:type] = 'inspec_report'
     results.delete(:controls) # Ensure source controls are never stored or shipped
+    results[:platform].delete :target # Ensure we dont report the target as it may contain passwords
     results[:node_name] = new_resource.node_name
     results[:end_time] = Time.now.utc.strftime('%FT%TZ')
     results[:node_uuid] = guid
