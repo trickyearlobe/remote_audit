@@ -13,7 +13,7 @@ depends 'remote_audit'
 In the wrapper cookbook recipe, use the `remote_audit_scan` resource to run the audit and report to ChefAutomate
 
 ```
-remote_audit_scan 'ncc-1701-sample' do    # A unique name for the scan resource to avooid resource cloning warnings
+remote_audit_scan 'ncc-1701-sample' do    # A unique name for the scan resource to avoid resource cloning warnings
   profile_name 'sample'                   # The profile name as shown in the Automate UI
   profile_user 'admin'                    # The automate user that owns the profile
   node_name 'ncc-1701'                    # The node name that will represent the remote host in the Automate UI

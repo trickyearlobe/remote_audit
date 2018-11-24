@@ -1,9 +1,9 @@
 require 'inspec'
 
-property :profile_name, String, required: true, desired_state: false
-property :profile_user, String, required: true, desired_state: false
-property :node_name, String, required: true, desired_state: false
-property :target, String, required: true, desired_state: false
+property :profile_name, String, required: true
+property :profile_user, String, required: true
+property :node_name, String, required: true
+property :target, String, required: true, sensitive: true
 
 default_action :run
 
@@ -15,7 +15,7 @@ action :run do
 
     Chef::Log.debug "Starting scan of node #{new_resource.node_name} with guid #{guid}"
     Chef::Log.debug "Instantiating Inspec runner with target: '#{new_resource.target}'"
-    runner = Inspec::Runner.new(target: new_resource.target)
+    runner = Inspec::Runner.new({'target' => new_resource.target, 'report' => true })
 
     rest = Chef::ServerAPI.new
     Chef::Log.debug "Fetching profile #{new_resource.profile_user}/#{new_resource.profile_name}"
@@ -30,7 +30,6 @@ action :run do
     passed_controls = results[:controls].select { |c| c[:status] == 'passed' }.size
     failed_controls = results[:controls].select { |c| c[:status] == 'failed' }.size
     skipped_controls = results[:controls].select { |c| c[:status] == 'skipped' }.size
-    Chef::Log.info "Summary: #{passed_controls} successful, #{failed_controls} failures, #{skipped_controls} skipped in #{results[:statistics][:duration]}s"
 
     results[:profiles].select! { |p| p } # Remove nil profiles
     results[:type] = 'inspec_report'
@@ -50,5 +49,9 @@ action :run do
 
     rest = Chef::ServerAPI.new("#{Chef::Config[:chef_server_url]}",Chef::Config)
     rest.post('data-collector', results)
+
+    # Abuse converge_by to display stats in a nice way (and flag that an action occured if using "notifies")
+    converge_by "Inspec summary for #{new_resource.node_name}: #{passed_controls} successful, #{failed_controls} failures, #{skipped_controls} skipped in #{results[:statistics][:duration]}s" do
+    end
   end
 end
