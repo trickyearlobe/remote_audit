@@ -2,7 +2,7 @@ class RemoteAuditException < RuntimeError
 end
 
 class RemoteAudit
-  # A class that prrovides nested exception handling
+  # A class that provides nested exception handling
   class ExceptionManager
     def self.execblock
       yield

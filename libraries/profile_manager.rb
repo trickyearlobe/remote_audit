@@ -19,11 +19,13 @@ class RemoteAudit
       def download_profile_chef(options = {})
         raise 'Expected :owner' unless options[:owner]
         raise 'Expected :profile' unless options[:profile]
-        if @profile_paths[options[:profile]]
-          Chef::Log.debug "Using cached profile #{options[:profile]} in #{@profile_paths[options[:profile]]}"
-        else
-          uri_path = build_uri_path(options)
-          @profile_paths[options[:profile]] = Chef::ServerAPI.new.streaming_request(uri_path, {})
+        uri_path = build_uri_path(options)
+        @profile_paths[options[:profile]] ||= begin
+          tf = Tempfile.new([options[:profile] + '-', '.tgz'])
+          tf.binmode
+          tf.write ::File.read(Chef::ServerAPI.new.streaming_request(uri_path, {}))
+          tf.close
+          tf
         end
       end
 

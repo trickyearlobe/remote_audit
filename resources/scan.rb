@@ -1,22 +1,26 @@
 require 'inspec'
 
-property :profile_name, String, required: true
-property :profile_user, String, required: true
+property :profiles, Array, required: true
 property :node_name, String, required: true
 property :target, String, required: true, sensitive: true
 
 default_action :run
 
 action :run do
+  $stdout.puts "" # Make output more
   RemoteAudit::ExceptionManager.execblock do
     guid = RemoteAudit::GuidManager.get(new_resource.node_name)
 
     Chef::Log.debug "Starting scan of node #{new_resource.node_name} with guid #{guid}"
     runner = Inspec::Runner.new('target' => new_resource.target, 'report' => true)
-    profile = RemoteAudit::ProfileManager.download_profile(
-      source: 'chef', owner: new_resource.profile_user, profile: new_resource.profile_name
-    )
-    runner.add_target(profile.path)
+
+    new_resource.profiles.each do |p|
+      RemoteAudit::ExceptionManager.execblock do
+        profile = RemoteAudit::ProfileManager.download_profile(p)
+        runner.add_target(profile.path)
+      end
+    end
+
     runner.run
     results = runner.report
 
@@ -37,8 +41,6 @@ action :run do
     report_size = results.to_json.bytesize
     if report_size > 900 * 1024
       Chef::Log.warn "Compliance report size is #{(report_size / (1024 * 1024.0)).round(2)} MB"
-    else
-      Chef::Log.debug "Compliance report size is #{(report_size / (1024 * 1024.0)).round(2)} MB"
     end
 
     rest = Chef::ServerAPI.new
@@ -49,7 +51,8 @@ action :run do
       " #{passed_controls} successful,"\
       " #{failed_controls} failures,"\
       " #{skipped_controls} skipped"\
-      " in #{results[:statistics][:duration]}s" do
+      " in #{results[:statistics][:duration].round(2)}s"\
+      " size #{(report_size / (1024 * 1024.0)).round(2)}mB" do
     end
   end
 end
