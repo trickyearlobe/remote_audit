@@ -6,13 +6,13 @@ A cookbook to run inspec scans against remote nodes and report back to Chef Auto
 
 Create a wrapper cookbook and add a dependency on `remote_audit` in `metadata.rb`
 
-```
+``` ruby
 depends 'remote_audit'
 ```
 
 In the wrapper cookbook recipe, use the `remote_audit_scan` resource to run the audit and report to ChefAutomate
 
-```
+``` ruby
 remote_audit_scan 'ncc-1701-sample' do    # A unique name for the scan resource to avoid resource cloning warnings
   profile_name 'sample'                   # The profile name as shown in the Automate UI
   profile_user 'admin'                    # The automate user that owns the profile
