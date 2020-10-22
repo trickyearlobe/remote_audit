@@ -12,10 +12,25 @@ depends 'remote_audit'
 
 In the wrapper cookbook recipe, use the `remote_audit_scan` resource to run the audit and report to ChefAutomate
 
-``` ruby
-# This example runs 2 profiles against the loopback
-# to test remote access over SSH (without needing another target node)
+# actions
 
+| Action          | Description                            |
+|-----------------|----------------------------------------|
+| `:run`          | execute the remote scan                |
+| `:nothing`      | do nothing                             |
+
+# properties
+
+| Property        | Description                                    | Required|
+|-----------------|------------------------------------------------|---------|
+| `profiles`      | an array of profile descriptor hashes          | Yes     |
+| `node_name`     | a unique name that represents the target host. | Yes     |
+| `target`        | an inspec remote target string                 | No      |
+| `inputs`        | a hash of Inspec Inputs                        | No      |
+
+# Example - A remote scan with 2 profiles
+
+``` ruby
 remote_audit_scan 'ncc-1701 multiple profiles' do
   profiles [
     { source: 'chef', owner: 'admin', profile: 'sample' },
@@ -26,17 +41,17 @@ remote_audit_scan 'ncc-1701 multiple profiles' do
 end
 ```
 
-# actions
+# Example - A local scan with inputs
 
-| Action          | Description                            |
-|-----------------|----------------------------------------|
-| `:run`          | execute the remote scan                |
-| `:nothing`      | do nothing                             |
-
-# properties
-
-| Property        | Description                                    |
-|-----------------|------------------------------------------------|
-| `profiles`      | an array of profile descriptor hashes          |
-| `node_name`     | a unique name that represents the target host. |
-| `target`        | an inspec remote target string                 |
+``` ruby
+remote_audit_scan 'a local database' do
+  profiles [
+    { source: 'chef', owner: 'admin', profile: 'cis-oracle-database' },
+  ]
+  node_name 'database1.mynode.local'
+  inputs(
+    oracle_home: "/u01/apps/oracle",
+    oracle_sid:  "database1"
+  )
+end
+```

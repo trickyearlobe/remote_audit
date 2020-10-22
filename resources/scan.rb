@@ -2,7 +2,9 @@ require 'inspec'
 
 property :profiles, Array, required: true
 property :node_name, String, required: true
-property :target, String, required: true, sensitive: true
+property :target, String, required: false, sensitive: true
+property :inputs, Hash, required: false, sensitive: true
+property :waivers, Hash, required: false, sensitive: true
 
 default_action :run
 
@@ -10,9 +12,13 @@ action :run do
   $stdout.puts "" # Make output more
   RemoteAudit::ExceptionManager.execblock do
     guid = RemoteAudit::GuidManager.get(new_resource.node_name)
+    opts = { "report" => true }
+    opts['target']  = new_resource.target if new_resource.target
+    opts['inputs']  = new_resource.inputs if new_resource.inputs
+    opts['waivers'] = new_resource.waivers if new_resource.waivers
 
     Chef::Log.debug "Starting scan of node #{new_resource.node_name} with guid #{guid}"
-    runner = Inspec::Runner.new('target' => new_resource.target, 'report' => true)
+    runner = Inspec::Runner.new(opts)
 
     new_resource.profiles.each do |p|
       RemoteAudit::ExceptionManager.execblock do
