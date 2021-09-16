@@ -21,12 +21,21 @@ In the wrapper cookbook recipe, use the `remote_audit_scan` resource to run the 
 
 # properties
 
-| Property        | Description                                    | Required|
-|-----------------|------------------------------------------------|---------|
-| `profiles`      | an array of profile descriptor hashes          | Yes     |
-| `node_name`     | a unique name that represents the target host. | Yes     |
-| `target`        | an inspec remote target string                 | No      |
-| `inputs`        | a hash of Inspec Inputs                        | No      |
+| Property        | Description                                                                    | Required|
+|-----------------|--------------------------------------------------------------------------------|---------|
+| `profiles`      | an array of profile descriptor hashes                                          | Yes     |
+| `node_name`     | a unique name that represents the target host.                                 | Yes     |
+| `target`        | an inspec remote target string                                                 | No      |
+| `inputs`        | a hash of Inspec Inputs                                                        | No      |
+| `waiverfile`    | a waiverfile (or an array of them)                                             | No      |
+| `policy_name`   | the policyname to show in Automate (default is the policyname of this node)    | No      |
+| `policy_group`  | the policygroup to show in Automate (defaults to the policygroup of this node) | No      |
+| `chef_tags`     | the tags which should be applied for this report                               | No      |
+| `ipaddress`     | the IP address to show in Automate (defaults to IP of this node)               | No      |
+| `platform`      | platform to show in Automate default: `{name:"TBA", release:"1.0"}`            | No      |
+| `source_fqdn`   | the source FQDN to show in Automate                                            | No      |
+| `environment`   | the environment to show in Automate                                            | No      |
+| `organization`  | the organization to show in Automate (defaults to the org of this node)        | No      |
 
 # Example - A remote scan with 2 profiles
 

@@ -4,7 +4,15 @@ property :profiles, Array, required: true
 property :node_name, String, required: true
 property :target, String, required: false, sensitive: true
 property :inputs, Hash, required: false, sensitive: true
-property :waivers, Hash, required: false, sensitive: true
+property :waiverfile, Hash, required: false, sensitive: false
+property :policy_name, String, default: node['policy_name'] || "not_set"
+property :policy_group, String, default: node['policy_group'] || "not_set"
+property :chef_tags, Array, default: ['remote_audit']
+property :ipaddress, String, default: node[:ipaddress]
+property :platform, Hash, default: {name:"TBA", release:"1.0"}
+property :source_fqdn, String, default: "Scanner #{node['fqdn']}"
+property :organization, String, default: "Remote Scanner"
+property :environment, String, default: "remote_scanner_#{node.name}"
 
 default_action :run
 
@@ -15,7 +23,7 @@ action :run do
     opts = { "report" => true }
     opts['target']  = new_resource.target if new_resource.target
     opts['inputs']  = new_resource.inputs if new_resource.inputs
-    opts['waivers'] = new_resource.waivers if new_resource.waivers
+    opts['waiverfile'] = Array(new_resource.waiverfile) if new_resource.waiverfile
 
     Chef::Log.debug "Starting scan of node #{new_resource.node_name} with guid #{guid}"
     runner = Inspec::Runner.new(opts)
@@ -41,8 +49,17 @@ action :run do
     results[:node_name] = new_resource.node_name
     results[:end_time] = Time.now.utc.strftime('%FT%TZ')
     results[:node_uuid] = guid
-    results[:environment] = "remote_scanner_#{node.name}"
+    results[:environment] = new_resource.environment
     results[:report_uuid] = SecureRandom.uuid
+
+    results[:platform] = new_resource.platform 
+    results[:source_fqdn] = new_resource.source_fqdn
+    results[:organization_name] = new_resource.organization
+    results[:policy_group] = new_resource.policy_group
+    results[:policy_name] = new_resource.policy_name
+    results[:chef_tags] = new_resource.chef_tags
+    results[:ipaddress] = new_resource.ipaddress
+    results[:fqdn] = new_resource.node_name
 
     report_size = results.to_json.bytesize
     if report_size > 900 * 1024
