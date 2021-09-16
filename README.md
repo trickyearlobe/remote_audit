@@ -32,7 +32,7 @@ In the wrapper cookbook recipe, use the `remote_audit_scan` resource to run the 
 | `policy_group`  | the policygroup to show in Automate (defaults to the policygroup of this node) | No      |
 | `chef_tags`     | the tags which should be applied for this report                               | No      |
 | `ipaddress`     | the IP address to show in Automate (defaults to IP of this node)               | No      |
-| `platform`      | platform to show in Automate default: `{name:"TBA", release:"1.0"}`            | No      |
+| `platform`      | platform to show in Automate. Use `{name:<platform>, release:<release>}`       | No      |
 | `source_fqdn`   | the source FQDN to show in Automate                                            | No      |
 | `environment`   | the environment to show in Automate                                            | No      |
 | `organization`  | the organization to show in Automate (defaults to the org of this node)        | No      |

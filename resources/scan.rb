@@ -9,7 +9,7 @@ property :policy_name, String, default: node['policy_name'] || "not_set"
 property :policy_group, String, default: node['policy_group'] || "not_set"
 property :chef_tags, Array, default: ['remote_audit']
 property :ipaddress, String, default: node[:ipaddress]
-property :platform, Hash, default: {name:"TBA", release:"1.0"}
+property :platform, Hash, default: {}
 property :source_fqdn, String, default: "Scanner #{node['fqdn']}"
 property :organization, String, default: "Remote Scanner"
 property :environment, String, default: "remote_scanner_#{node.name}"
@@ -52,7 +52,9 @@ action :run do
     results[:environment] = new_resource.environment
     results[:report_uuid] = SecureRandom.uuid
 
-    results[:platform] = new_resource.platform 
+    if new_resource.platform[:release] && new_resource.platform[:name]
+      results[:platform] = new_resource.platform
+    end
     results[:source_fqdn] = new_resource.source_fqdn
     results[:organization_name] = new_resource.organization
     results[:policy_group] = new_resource.policy_group
@@ -60,6 +62,8 @@ action :run do
     results[:chef_tags] = new_resource.chef_tags
     results[:ipaddress] = new_resource.ipaddress
     results[:fqdn] = new_resource.node_name
+
+    # require 'pry'; binding.pry
 
     report_size = results.to_json.bytesize
     if report_size > 900 * 1024
