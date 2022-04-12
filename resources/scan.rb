@@ -4,7 +4,7 @@ property :profiles, Array, required: true
 property :node_name, String, required: true
 property :target, String, required: false, sensitive: true
 property :inputs, Hash, required: false, sensitive: true
-property :waiverfile, Hash, required: false, sensitive: false
+property :waiverfiles, Array, required: false, sensitive: false
 property :policy_name, String, default: node['policy_name'] || "not_set"
 property :policy_group, String, default: node['policy_group'] || "not_set"
 property :chef_tags, Array, default: ['remote_audit']
@@ -23,7 +23,7 @@ action :run do
     opts = { "report" => true }
     opts['target']  = new_resource.target if new_resource.target
     opts['inputs']  = new_resource.inputs if new_resource.inputs
-    opts['waiverfile'] = Array(new_resource.waiverfile) if new_resource.waiverfile
+    opts['waiver_file'] = new_resource.waiverfiles if new_resource.waiverfiles
 
     Chef::Log.debug "Starting scan of node #{new_resource.node_name} with guid #{guid}"
     runner = Inspec::Runner.new(opts)
